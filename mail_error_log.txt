@@ -1,0 +1,12 @@
+December-32-2018 20:32:41
+PHPMailer\PHPMailer\Exception: SMTP connect() failed. https://github.com/PHPMailer/PHPMailer/wiki/Troubleshooting in C:\xampp\htdocs\Real World Projects\Login_System\vendor\phpmailer\phpmailer\src\PHPMailer.php:1775
+Stack trace:
+#0 C:\xampp\htdocs\Real World Projects\Login_System\vendor\phpmailer\phpmailer\src\PHPMailer.php(1516): PHPMailer\PHPMailer\PHPMailer->smtpSend('Date: Wed, 12 D...', 'This is a multi...')
+#1 C:\xampp\htdocs\Real World Projects\Login_System\vendor\phpmailer\phpmailer\src\PHPMailer.php(1352): PHPMailer\PHPMailer\PHPMailer->postSend()
+#2 C:\xampp\htdocs\Real World Projects\Login_System\functions\functions.php(206): PHPMailer\PHPMailer\PHPMailer->send()
+#3 C:\xampp\htdocs\Real World Projects\Login_System\functions\functions.php(262): send_mail('nfklfl@jkj.m', 'ACCOUNT ACTIVAT...', 'Please click to...', 'From: admin@voi...')
+#4 C:\xampp\htdocs\Real World Projects\Login_System\functions\functions.php(159): register('jjjjjjjjjj', 'kjlkjl', 'ioqop', 'nfklfl@jkj.m', '$2y$12$5qx7.1mA...')
+#5 C:\xampp\htdocs\Real World Projects\Login_System\register.php(23): validate_user_registration()
+#6 {main}
+
+

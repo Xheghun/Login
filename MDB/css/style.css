@@ -1,0 +1,61 @@
+html,
+body,
+header,
+#intro {
+    height: 100%;
+}
+
+#intro {
+    background: url("../img/photo.jpg")no-repeat center center fixed;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+}
+
+
+
+.MultiCarousel {
+    float: left;
+    overflow: hidden;
+    padding: 15px;
+    width: 100%;
+    position:relative;
+}
+.MultiCarousel .MultiCarousel-inner {
+    transition: 1s ease all;
+    float: left;
+}
+.MultiCarousel .MultiCarousel-inner .item {
+    float: left;
+}
+.MultiCarousel .MultiCarousel-inner .item > div {
+    /*text-align: center;*/
+    padding:10px;
+    margin:10px;
+    background:#ffffff;
+    color:#666;
+}
+.MultiCarousel .leftLst, .MultiCarousel .rightLst {
+    position:absolute;
+    border-radius:50%;
+    top:calc(60% - 10px);
+}
+.MultiCarousel .leftLst {
+    left:0;
+}
+.MultiCarousel .rightLst {
+    right:0;
+}
+
+.MultiCarousel .leftLst.over, .MultiCarousel .rightLst.over {
+    pointer-events: none; background:#ccc;
+}
+
+
+.icon {
+    height: 25px;
+    width: 25px;
+    border-radius: 100%;
+    margin: 15px;
+}
