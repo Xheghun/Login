@@ -110,12 +110,12 @@ function validate_user_registration() {
     $min = 3;
     $max = 20;
     if ($_SERVER["REQUEST_METHOD"] == "POST") {
-        $firstname = filter_input(INPUT_POST, "firstname");
-        $lastname = filter_input(INPUT_POST,"lastname");
-        $username = filter_input(INPUT_POST,"username");
-        $email = filter_input(INPUT_POST,"email");
-        $password = filter_input(INPUT_POST, "password");
-        $confirm_pass = filter_input(INPUT_POST,"confirm_password");
+        $firstname = trim(filter_input(INPUT_POST, "firstname", FILTER_SANITIZE_SPECIAL_CHARS));
+        $lastname = trim(filter_input(INPUT_POST,"lastname", FILTER_SANITIZE_SPECIAL_CHARS));
+        $username = trim(filter_input(INPUT_POST,"username", FILTER_SANITIZE_SPECIAL_CHARS));
+        $email = trim(filter_input(INPUT_POST,"email", FILTER_SANITIZE_EMAIL));
+        $password = trim(filter_input(INPUT_POST, "password", FILTER_SANITIZE_SPECIAL_CHARS));
+        $confirm_pass = trim(filter_input(INPUT_POST,"confirm_password", FILTER_SANITIZE_SPECIAL_CHARS));
 
         if (strlen($firstname) < $min) {
             $errors[] = "first name is too short, min of {$min} characters required {$firstname}";
@@ -150,6 +150,7 @@ function validate_user_registration() {
         if ($password !== $confirm_pass) {
             $errors[] = "passwords doesn't match";
         }
+
 
         if (!empty($errors)) {
             foreach ($errors as $error) {
@@ -199,9 +200,10 @@ function send_mail($email, $subject, $msg, $headers) {
         //Content
         $mail->isHTML(true);
         //  $mail->secureHeader($headers);// Set email format to HTML
+
         $mail->Subject = $subject;
-        $mail->Body = $msg;
-        $mail->AltBody = 'This is the body in plain text for non-HTML mail clients';
+        //$mail->Body =  $mail->msgHTML(file_get_contents('activation_mail_template.php'),__DIR__);
+        $mail->Body = $mail->msgHTML($msg);
         $mail->setFrom("noreply@void.io", "Xheghun");
         if (!$mail->send()) {
             return false;
@@ -252,11 +254,64 @@ function register($firstname, $lastname, $username, $email, $password) {
         $result = query($sql);
         confirm($result);
 
-        $subject = "ACCOUNT ACTIVATION(void.io)";
-        $msg = "Please click to activate account";
-        $msg .= <<<H
-        <a class="btn btn-success btn-lg" href="http://localhost/Login_System(Standard)/activate.php?email=$email&code=$validation_code">ACTIVATE ACCOUNT</a>";
-H;
+        $msg = <<<HTML
+        <!DOCTYPE html>
+        <html>
+            <head>
+            
+            </head>
+            <body>
+                <div class="mail" style="width: 100%;">    
+                        <div style="
+                                color: white;
+                                -moz-border-radius-topleft: 4px;
+                                -moz-border-radius-topright: 4px;
+                                margin-left: 5%;
+                                margin-right: 5%;
+                                padding: 5px;
+                                text-align: center;
+                                background-color: crimson;
+                                font-family: 'Arial Narrow';
+                            ">
+                            <h2 >Hello {$username}</h2>
+                        </div>
+                        <div class="body" style=" margin-left: 10%;
+                            margin-right: 10%;
+                            text-align: left;
+                            padding: 4px;
+                            font-family: Calibri;
+                            font-weight: bold;
+                            line-height: 0.3in;">
+                            <p>we noticed you recently registered with us.
+                                <br>you are one step away from activating your projectX account, please click on the link below to activate your account.
+                                <br/>
+                            </p>
+                        </div>
+                        <div 
+                            style="
+                                margin-left: 8%;
+                                margin-right: 8%;
+                                text-align: center;"
+                        >
+                            <a href="http://localhost:8888/Login_System(Standard)/activate.php?email={$email}&code={$validation_code}"class="button"
+                                style="color: white;
+                                        background-color: crimson;
+                                        font-weight: bolder;
+                                        border: 0;
+                                        padding: 25px;
+                                        text-decoration: none;
+                                        border-radius: 4px;"
+                            >Activate</a>
+                        </div>
+                    </div>
+                </center>
+            </body>
+        </html>
+             
+HTML;
+
+        $subject = "ACCOUNT ACTIVATION (void.io)";
+
         $header = "From: admin@void.io";
         //send mail
         if (send_mail($email,$subject,$msg,$header)) {
@@ -265,7 +320,7 @@ H;
             confirm($result);
             return true;
         }else{
-            $sql = "UPDATE users SET verification_link_sent = 'no' WHERE email = '$email'";
+            $sql = "DELETE FROM users WHERE email = '$email'";
             $result = query($sql);
             confirm($result);
             return false;
@@ -280,8 +335,8 @@ H;
 function activate() {
     if ($_SERVER["REQUEST_METHOD"] == "GET") {
         if (isset($_GET["email"])) {
-            $email = filter_input(INPUT_GET, "email");
-            $code = filter_input(INPUT_GET,"code");
+            $email = trim(filter_input(INPUT_GET, "email", FILTER_SANITIZE_EMAIL));
+            $code = trim(filter_input(INPUT_GET,"code", FILTER_SANITIZE_SPECIAL_CHARS));
 
 
             $sql = "SELECT id FROM users WHERE email = '".escape($email)."' AND validation_code = '".escape($code)."'";
@@ -311,9 +366,9 @@ function activate() {
 function validate_user_login() {
     $errors = [];
     if ($_SERVER["REQUEST_METHOD"] == "POST") {
-        $email = filter_input(INPUT_POST,"email");
-        $password = filter_input(INPUT_POST,"password");
-        $remember = filter_input(INPUT_POST,"remember");
+        $email = trim(filter_input(INPUT_POST,"email", FILTER_SANITIZE_EMAIL));
+        $password = trim(filter_input(INPUT_POST,"password", FILTER_SANITIZE_SPECIAL_CHARS));
+        $remember = trim(filter_input(INPUT_POST,"remember", FILTER_SANITIZE_SPECIAL_CHARS));
 
         if (empty($email)) {
             $errors[] = "Email field required";
@@ -382,7 +437,7 @@ function logged_in() {
 function recover_password() {
     if ($_SERVER['REQUEST_METHOD'] == "POST") {
         if (isset($_SESSION['token']) && $_POST['token'] === $_SESSION['token']) {
-            $email = escape(filter_input(INPUT_POST,"email"));
+            $email = trim(filter_input(INPUT_POST,"email", FILTER_SANITIZE_EMAIL));
             if (email_exits($email)) {
                 $validation_code = md5($email.microtime());
                 $sql = "UPDATE users SET validation_code = '".escape($validation_code)."' WHERE email = '".escape($email)."'";
@@ -391,11 +446,56 @@ function recover_password() {
                 setcookie("temp_access",$validation_code, time()+60*20);
 
                 $subject = "Password Reset(void.io)";
-                $body = "Please Use this code to reset your account password {$validation_code}
-                            <br>";
-                $body .= <<<H
-    <a href="http://localhost/code.php?email=$email&code=$validation_code" class="btn btn-success btn-lg">RESET</a>
-H;
+               $body = <<<HTML
+                <html>
+                <head>
+                   
+                </head>
+                <body>
+                <div class="mail" style=" width: 100%;">
+                    <div class="heading" style="
+                            color: white;
+                            -moz-border-radius-topleft: 4px;
+                            -moz-border-radius-topright: 4px;
+                            margin-left: 5%;
+                            margin-right: 5%;
+                            padding: 5px;
+                            text-align: center;
+                            background-color: crimson;
+                            font-family: 'Arial Narrow';
+                            ">
+                        <p style="font-size: 2em;
+                            font-weight: bold;">Password Reset confirmation</p>
+                    </div>
+                    <div  style=" margin-left: 10%;
+                            margin-right: 10%;
+                            text-align: left;
+                            padding: 4px;
+                            font-family: Calibri;
+                            line-height: 0.3in;">
+                        <p>Hello user we recently received request to  reset your ProjectX account password with us.
+                            <br/>please use this code to reset your password <b>{$validation_code}</b>
+                            <br>if this wasn't you, we suggest you <a href="http://xheghun-projectx.000webhostapp.com">change</a>  your password.
+                        </p>
+                    </div>
+                    <div class="button" style="margin-left: 8%;
+                            margin-right: 8%;
+                            text-align: center;">
+                        <a style="color: white;
+                            padding: 25px;
+                            background-color: crimson;
+                            font-weight: bolder;
+                            border: 0;
+                            margin: 10px;
+                            text-decoration: none;
+                            border-radius: 4px;" href="http://localhost:8888/code.php?email=$email&code=$validation_code" class="link">Reset</a>
+                    </div>
+                
+                </div>
+                </body>
+                </html>
+
+HTML;
                 $header = "From: noreply@void.io";
 
                 try {
@@ -403,7 +503,7 @@ H;
                             echo validation_errors("Error Sending Mail");
                         }else{
                             set_message("Please Check Your spam folder for your password reset code");
-                            redirect("code.php");
+                            redirect("recover.php");
                         }
                     } catch (Exception $e) {
                 }
@@ -411,6 +511,7 @@ H;
                 echo validation_errors("This Email Doesn't Exist");
             }
         }else {
+            set_message("Token not set");
             redirect("index.php");
         }
     }
@@ -454,8 +555,8 @@ function password_reset() {
         if (isset($_GET['email']) && isset($_GET['validation_code'])) {
             if (isset($_SESSION['token']) && isset($_POST['token'])) {
                 if ($_POST['token'] === $_SESSION['token']) {
-                    $pass = filter_input(INPUT_POST,trim("password"));
-                    $confirm_pass = filter_input(INPUT_POST,trim("confirm_password"));
+                    $pass = trim(filter_input(INPUT_POST,trim("password"), FILTER_SANITIZE_SPECIAL_CHARS));
+                    $confirm_pass = trim(filter_input(INPUT_POST,trim("confirm_password"), FILTER_SANITIZE_SPECIAL_CHARS));
                     if ($pass == $confirm_pass) {
                         $password = md5($pass);
                         $sql = "UPDATE users SET password = '".escape($password)."', validation_code = '0' WHERE email = '" . escape($_GET['email']) . "'";
@@ -474,5 +575,48 @@ function password_reset() {
         set_message("Sorry the page has expired");
         redirect("recover.php");
     }
+}
+
+
+//change password function
+function change_password() {
+    if ($_SERVER['REQUEST_METHOD'] == "POST") {
+        if (isset($_POST['submit'])) {
+            $oldpass = filter_input(INPUT_POST, "oldpass", FILTER_SANITIZE_SPECIAL_CHARS);
+            $newpass = filter_input(INPUT_POST, "newpass", FILTER_SANITIZE_SPECIAL_CHARS);
+            $cnewpass = filter_input(INPUT_POST, "cnewpass", FILTER_SANITIZE_SPECIAL_CHARS);
+
+            if ($newpass !== $cnewpass) {
+                set_message("Passwords don't match");
+                redirect("change_password.php");
+            } else {
+                $sql = "SELECT password FROM users WHERE email = '" . escape($_SESSION["email"]) . "' OR email = '" . $_COOKIE["email"] . "'";
+                $result = query($sql);
+                confirm($result);
+                if (row_count($result) == 1) {
+                    $row = fetch_array($result);
+                    $existing_password = $row['password'];
+                    if (password_verify($oldpass, $existing_password)) {
+                        $hashed_newpass = password_hash(PASSWORD_BCRYPT, $newpass);
+                        $sql = "UPDATE users SET  password = '" . escape($hashed_newpass) . "' WHERE email = '" . escape($_SESSION["email"]) . "' OR email = '" . $_COOKIE["email"] . "'";
+                        $result = query($sql);
+                        confirm($result);
+                        set_message("Password Has Been Updated");
+                        return true;
+                    }
+                } else {
+                    set_message("Wrong Password <b>Have You forgotten your password?</b> <a href='recover.php'>reset</a>");
+                    return false;
+                }
+            }
+        }
+        else {
+                set_message("Token Not Set");
+                //redirect("change_password.php");
+            }
+        } else {
+            set_message("invalid request");
+            //redirect("change_password.php");
+        }
 }
 //echo token_generator();

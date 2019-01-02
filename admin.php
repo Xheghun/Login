@@ -1,4 +1,5 @@
 <?php
+include_once "functions/init.php";
 /**
  * Created by PhpStorm.
  * User: xheghun

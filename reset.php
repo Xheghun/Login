@@ -1,4 +1,5 @@
 <?php
+include_once "functions/init.php";
 /**
  * Created by PhpStorm.
  * User: xheghun
@@ -23,7 +24,7 @@
                 <div class="row flex-center">
                     <div class="col-md-6">
                         <?php display_message();
-                            //password_reset();
+                            password_reset();
                         ?>
                     </div>
                 </div>
@@ -42,6 +43,7 @@
                                             <label for="c_password">Confirm New Password</label>
                                         </div>
                                         <button type="submit"  class="btn btn-block btn-success" name="reset-password-submit" id="submit" tabindex="2">Change</button>
+                                        <input type="hidden" name="token" id="token" value="<?php echo token_generator();?>" />
                                     </form>
                                 </div>
                             </div>

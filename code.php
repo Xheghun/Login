@@ -1,4 +1,5 @@
 <?php
+include_once "functions/init.php";
 /**
  * Created by PhpStorm.
  * User: xheghun
@@ -23,7 +24,7 @@
                 <div class="row flex-center">
                     <div class="col-md-6">
                         <?php display_message();
-                            //validate_code();
+                            validate_code();
                         ?>
                     </div>
                 </div>

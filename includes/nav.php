@@ -28,6 +28,7 @@
                 </li>
                 <?php if (logged_in()):?>
                     <li class="nav-item"><a class="nav-link" href="admin.php">Admin</a> </li>
+                    <li class="nav-item"><a class="nav-link" href="settings.php" target="_blank">Settings</a></li>
                 <?php endif;?>
                 <li class="nav-item"><a class="nav-link" href="#">About</a></li>
                 <li class="nav-item"><a class="nav-link" href="r">Contact</a></li>
